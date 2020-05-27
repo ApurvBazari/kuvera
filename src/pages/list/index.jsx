@@ -3,26 +3,27 @@ import React from 'react'
 import Table from '../../components/table'
 import Search from '../../components/search'
 
-import { Container } from './style'
+import { Container, Button, PageNum, Pagination } from './style'
 
 export default class List extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: null,
+      data: [],
       error: null,
       tableData: null,
       sOrder: null,
       sortBy: null,
       searchData: null,
-      searchVal: ''
+      searchVal: '',
+      currentIndex: 1
     }
   }
 
   componentDidMount = () => {
     fetch('https://api.kuvera.in/api/v3/funds.json')
       .then(res => res.json())
-      .then(data => this.setState({data, tableData: data.slice(0, 100)}))
+      .then(data => this.setState({data, tableData: data.slice(0, 100), tempData: data}))
       .catch(error => this.setState({error}))
   }
 
@@ -49,7 +50,8 @@ export default class List extends React.Component {
     this.setState({
       sOrder: sOrder === 'desc' ? 'asc' : 'desc',
       tableData: newOrder.slice(0, 100),
-      sortBy: target
+      sortBy: target,
+      tempData: newOrder
     })
   }
 
@@ -62,7 +64,9 @@ export default class List extends React.Component {
     let newData = data.filter(val => val.name.toLowerCase().search(searchVal.toLowerCase()) > -1)
     this.setState({
       searchData: newData,
-      tableData: newData.slice(0, 100)
+      tempData: newData,
+      tableData: newData.slice(0, 100),
+      currentIndex: 1
     })
   }
 
@@ -70,9 +74,29 @@ export default class List extends React.Component {
     window.location.assign(`/explore/${code}`)
   }
 
+  prevClick = () => {
+    const { currentIndex, tempData } = this.state;
+    this.setState({
+      // tableData: tempData.slice(currentIndex*100+1, ((currentIndex+1)*100)),
+      tableData: tempData.slice(((currentIndex-2)*100), ((currentIndex-1)*100)),
+      currentIndex: currentIndex - 1
+    })
+  }
+
+  nextClick = () => {
+    const { currentIndex, tempData } = this.state;
+    this.setState({
+      tableData: tempData.slice(currentIndex*100+1, ((currentIndex+1)*100)),
+      currentIndex: currentIndex + 1
+    })
+  }
+
   render() {
-    const { tableData, sortBy, sOrder } = this.state
-    console.log(tableData)
+    const { tableData, sortBy, data, searchData, currentIndex } = this.state
+    console.log(searchData);
+    let tempData = !searchData ? [...data] : [...searchData];
+    const showPrev = currentIndex > 1;
+    const showNext = tempData.length > 100*currentIndex
     return(
       <Container>
         <Search onInputChange={this.onInputChange} searchValue={this.searchValue} />
@@ -83,6 +107,13 @@ export default class List extends React.Component {
             sortBy={sortBy}
             data={tableData}
           />
+        )}
+        {tableData && (
+          <Pagination>
+            {showPrev && <Button onClick={this.prevClick}>Prev</Button>}
+            <PageNum>{currentIndex}/{Math.ceil(tempData.length/100)}</PageNum>
+            {showNext && <Button onClick={this.nextClick}>Next</Button>}
+          </Pagination>
         )}
       </Container>
     )
