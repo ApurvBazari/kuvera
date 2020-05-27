@@ -11,6 +11,10 @@ export const TableRow = styled.tr`
   border: 1px solid #dddddd;
 `;
 
+export const THead = styled.thead ``;
+
+export const TBody = styled.tbody ``;
+
 export const TableHead = styled.th`
   color: white;
   border: 1px solid #dddddd;
@@ -20,4 +24,9 @@ export const TableHead = styled.th`
 export const TableData = styled.td`
   border: 1px solid #dddddd;
   text-align: center;
+  cursor: ${props => props.pointer ? 'pointer' : 'initial'};
+
+  &:hover {
+    text-decoration: ${props => props.pointer ? 'underline' : 'initial'}
+  }
 `;

@@ -14,6 +14,7 @@ export default class List extends React.Component {
       tableData: null,
       sOrder: null,
       sortBy: null,
+      searchData: null,
       searchVal: ''
     }
   }
@@ -43,7 +44,7 @@ export default class List extends React.Component {
 
   onSort = (target) => {
     let { sOrder, data, searchVal, searchData } = this.state;
-    let tempData = searchVal === '' ? data : searchData;
+    let tempData = searchVal === '' ? [...data] : [...searchData];
     let newOrder = tempData.slice(0).sort(sOrder === 'desc' ? this.dynamicSort(`-${target}`) : this.dynamicSort(target))
     this.setState({
       sOrder: sOrder === 'desc' ? 'asc' : 'desc',
@@ -65,16 +66,20 @@ export default class List extends React.Component {
     })
   }
 
+  nameClicked = code => {
+    window.location.assign(`/explore/${code}`)
+  }
+
   render() {
     const { tableData, sortBy, sOrder } = this.state
-    console.log(sOrder)
-    console.log(sortBy)
+    console.log(tableData)
     return(
       <Container>
         <Search onInputChange={this.onInputChange} searchValue={this.searchValue} />
         {tableData && (
           <Table
             onSort={this.onSort}
+            nameClicked={this.nameClicked}
             sortBy={sortBy}
             data={tableData}
           />
